@@ -1,0 +1,58 @@
+/* ── Shell layout: sidebar + main ── */
+.dashboard-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--slate-50);
+}
+
+/* ── Main column (everything right of sidebar) ── */
+.dashboard-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+/* ── Scrollable content area ── */
+.dashboard-content {
+  flex: 1;
+  padding: 24px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+/* ── Section spacing ── */
+.dash-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Charts row: line chart (wider) + donut ── */
+.dash-charts-row {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  flex-direction: unset;
+}
+
+/* ── Bottom row: budget + transactions ── */
+.dash-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  flex-direction: unset;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .dash-charts-row  { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .dashboard-content { padding: 16px; gap: 16px; }
+  .dash-bottom-row  { grid-template-columns: 1fr; }
+}

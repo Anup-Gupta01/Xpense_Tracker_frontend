@@ -1,0 +1,291 @@
+/* =============================================
+   Shared Auth Pages Styles
+   Used by: LoginPage, SignupPage
+   ============================================= */
+
+/* ── Layout ── */
+.auth-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+.auth-layout-reverse {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ── Form Panel ── */
+.auth-form-panel {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-8) var(--space-8);
+  background: var(--white);
+  position: relative;
+  overflow-y: auto;
+}
+
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--navy-500);
+  transition: color var(--transition-fast);
+  margin-bottom: var(--space-8);
+  align-self: flex-start;
+}
+
+.auth-back:hover {
+  color: var(--navy-900);
+}
+
+.auth-form-content {
+  max-width: 380px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Auth Headings ── */
+.auth-heading {
+  margin-bottom: var(--space-8);
+}
+
+.auth-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--navy-900);
+  letter-spacing: -0.025em;
+  margin-bottom: var(--space-2);
+  line-height: 1.2;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--teal-500);
+  font-weight: 500;
+}
+
+/* ── Form ── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.auth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Divider ── */
+.auth-divider {
+  margin: var(--space-5) 0;
+}
+
+/* ── Social Buttons ── */
+.auth-social {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.auth-social-top {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* ── Switch ── */
+.auth-switch {
+  margin-top: var(--space-5);
+  font-size: 13px;
+  color: var(--navy-500);
+}
+
+/* ── Password Strength ── */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.strength-bar {
+  height: 4px;
+  flex: 1;
+  border-radius: 2px;
+  transition: background var(--transition-base);
+}
+
+.strength-label {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 44px;
+  text-align: right;
+}
+
+/* ── Brand Panel ── */
+.auth-brand-panel {
+  background: linear-gradient(135deg, var(--navy-900) 0%, #1a3a4a 60%, #0d3341 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background pattern */
+.auth-brand-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 20% 80%, rgb(45 212 191 / 0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgb(99 102 241 / 0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 60% 60%, rgb(255 255 255 / 0.02) 0%, transparent 40%);
+}
+
+.auth-brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+  text-align: center;
+}
+
+.auth-brand-visual {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-8);
+}
+
+.brand-icon-wrap {
+  width: 72px;
+  height: 72px;
+  background: rgb(255 255 255 / 0.1);
+  border: 1px solid rgb(255 255 255 / 0.15);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+}
+
+.brand-big-logo {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--teal-400);
+  letter-spacing: -0.04em;
+}
+
+.auth-brand-headline {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--space-4);
+}
+
+.auth-brand-body {
+  font-size: 16px;
+  color: rgb(255 255 255 / 0.55);
+  line-height: 1.65;
+  margin-bottom: var(--space-8);
+}
+
+/* Stats row */
+.auth-brand-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  background: rgb(255 255 255 / 0.06);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-6);
+}
+
+.brand-stat {
+  text-align: center;
+}
+
+.brand-stat-val {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+
+.brand-stat-lbl {
+  font-size: 11px;
+  color: rgb(255 255 255 / 0.4);
+  margin-top: 2px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.brand-stat-divider {
+  width: 1px;
+  height: 32px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+/* Benefits list */
+.auth-benefits {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auth-benefit-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 14px;
+  color: rgb(255 255 255 / 0.7);
+  font-weight: 500;
+}
+
+.benefit-check {
+  width: 22px;
+  height: 22px;
+  background: rgb(45 212 191 / 0.15);
+  border: 1px solid rgb(45 212 191 / 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--teal-400);
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .auth-layout,
+  .auth-layout-reverse {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand-panel {
+    display: none;
+  }
+
+  .auth-form-panel {
+    padding: var(--space-6) var(--space-4);
+  }
+}

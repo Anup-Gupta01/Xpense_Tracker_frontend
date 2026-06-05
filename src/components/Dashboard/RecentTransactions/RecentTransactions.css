@@ -1,0 +1,152 @@
+.tx-card {
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.tx-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.tx-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy-900);
+  letter-spacing: -0.01em;
+}
+
+.tx-card-subtitle {
+  font-size: 12px;
+  color: var(--slate-400);
+  margin-top: 2px;
+}
+
+/* List */
+.tx-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--slate-100);
+  transition: background var(--transition-fast);
+}
+
+.tx-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tx-row:hover {
+  background: var(--slate-50);
+  margin: 0 -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-radius: var(--radius-md);
+}
+
+/* Icon */
+.tx-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tx-icon-glyph {
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Info */
+.tx-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tx-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tx-name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--navy-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--slate-400);
+}
+
+.tx-category {
+  font-weight: 500;
+}
+
+.tx-dot { color: var(--slate-300); }
+
+.tx-date {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tx-pending-icon {
+  color: var(--warning);
+}
+
+/* Badge */
+.tx-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.tx-badge.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Amount */
+.tx-amount {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13.5px;
+  font-weight: 600;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.tx-amount.income  { color: var(--success); }
+.tx-amount.expense { color: var(--navy-800); }
+
+.tx-arrow { flex-shrink: 0; }
