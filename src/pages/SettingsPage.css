@@ -1,0 +1,204 @@
+/* ── Section card ─────────────────────────────────────────────────────────── */
+.stg-section {
+  overflow: hidden;
+}
+
+.stg-section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.stg-section-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stg-icon-teal    { background: var(--teal-50);         color: var(--teal-500); }
+.stg-icon-indigo  { background: var(--indigo-50);        color: var(--indigo-600); }
+.stg-icon-warning { background: rgba(245,158,11,0.1);    color: #d97706; }
+.stg-icon-red     { background: rgba(239,68,68,0.1);     color: var(--error); }
+
+.stg-section-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy-900);
+}
+
+.stg-title-danger { color: var(--error); }
+
+.stg-section-sub {
+  font-size: 12.5px;
+  color: var(--slate-400);
+  margin-top: 2px;
+}
+
+.stg-section-body {
+  padding: 4px 0;
+}
+
+/* ── Setting row ──────────────────────────────────────────────────────────── */
+.stg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 24px;
+}
+
+.stg-row-label { flex: 1; min-width: 0; }
+
+.stg-row-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy-800);
+}
+
+.stg-row-desc {
+  font-size: 12.5px;
+  color: var(--slate-400);
+  margin-top: 2px;
+}
+
+.stg-row-control { flex-shrink: 0; }
+
+/* ── Dividers ─────────────────────────────────────────────────────────────── */
+.stg-divider {
+  height: 1px;
+  background: var(--slate-100);
+  margin: 0 24px;
+}
+
+.stg-divider-space { margin: 16px 24px; }
+
+/* ── Form grid ────────────────────────────────────────────────────────────── */
+.stg-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 20px 24px 16px;
+}
+
+.stg-form-grid-1col { grid-template-columns: 1fr; }
+
+.stg-full { grid-column: 1 / -1; }
+
+.stg-form-actions {
+  padding: 8px 24px 20px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* ── Toggle switch ────────────────────────────────────────────────────────── */
+.stg-toggle {
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+}
+
+.stg-toggle input { display: none; }
+
+.stg-toggle-track {
+  display: block;
+  width: 44px;
+  height: 24px;
+  background: var(--slate-200);
+  border-radius: var(--radius-full);
+  position: relative;
+  transition: background var(--transition-base);
+}
+
+.stg-toggle input:checked ~ .stg-toggle-track {
+  background: var(--teal-500);
+}
+
+.stg-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--white);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base);
+}
+
+.stg-toggle input:checked ~ .stg-toggle-track .stg-toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* ── Theme buttons ────────────────────────────────────────────────────────── */
+.stg-theme-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.stg-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  color: var(--navy-600);
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.stg-theme-btn:hover {
+  background: var(--slate-50);
+  border-color: var(--slate-300);
+}
+
+.stg-theme-btn.active {
+  background: var(--navy-900);
+  color: var(--white);
+  border-color: var(--navy-900);
+}
+
+/* ── Select wrapper ───────────────────────────────────────────────────────── */
+.stg-select-wrap {
+  min-width: 180px;
+}
+
+/* ── Password success ─────────────────────────────────────────────────────── */
+.stg-pw-success {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  margin: 0 24px 8px;
+  animation: fadeIn 0.25s ease;
+}
+
+/* ── Danger zone ──────────────────────────────────────────────────────────── */
+.stg-danger-zone {
+  border-color: rgba(239, 68, 68, 0.25);
+  overflow: hidden;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .stg-form-grid { grid-template-columns: 1fr; }
+  .stg-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .stg-select-wrap { min-width: 100%; }
+}

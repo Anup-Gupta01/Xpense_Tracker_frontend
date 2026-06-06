@@ -1,0 +1,15 @@
+/* ── Scrollable page content area (inside dashboard-shell/dashboard-main) ── */
+.page-content {
+  flex: 1;
+  padding: 24px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  background: var(--slate-50);
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .page-content { padding: 16px; gap: 16px; }
+}

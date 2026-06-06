@@ -1,7 +1,7 @@
 import { Bell, Search, Plus, Calendar } from 'lucide-react'
 import './DashboardHeader.css'
 
-export default function DashboardHeader({ title = 'Dashboard', subtitle }) {
+export default function DashboardHeader({ title = 'Dashboard', subtitle, headerRight }) {
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   })
@@ -16,40 +16,52 @@ export default function DashboardHeader({ title = 'Dashboard', subtitle }) {
         </p>
       </div>
 
-      {/* Right: actions */}
+      {/* Right: page-specific actions OR default dashboard actions */}
       <div className="dash-header-right">
-        {/* Date */}
-        <div className="dash-header-date" id="header-date">
-          <Calendar size={13} />
-          <span>{today}</span>
-        </div>
+        {headerRight ? (
+          <>
+            <div className="dash-header-date" id="header-date">
+              <Calendar size={13} />
+              <span>{today}</span>
+            </div>
+            {headerRight}
+          </>
+        ) : (
+          <>
+            {/* Date */}
+            <div className="dash-header-date" id="header-date">
+              <Calendar size={13} />
+              <span>{today}</span>
+            </div>
 
-        {/* Search */}
-        <div className="dash-search-wrap" id="header-search">
-          <Search size={14} className="dash-search-icon" />
-          <input
-            type="text"
-            placeholder="Search transactions…"
-            className="dash-search-input"
-            aria-label="Search transactions"
-          />
-        </div>
+            {/* Search */}
+            <div className="dash-search-wrap" id="header-search">
+              <Search size={14} className="dash-search-icon" />
+              <input
+                type="text"
+                placeholder="Search transactions…"
+                className="dash-search-input"
+                aria-label="Search transactions"
+              />
+            </div>
 
-        {/* Notification bell */}
-        <button
-          className="dash-icon-btn"
-          aria-label="Notifications"
-          id="header-notifications"
-        >
-          <Bell size={16} />
-          <span className="notif-dot" aria-hidden="true" />
-        </button>
+            {/* Notification bell */}
+            <button
+              className="dash-icon-btn"
+              aria-label="Notifications"
+              id="header-notifications"
+            >
+              <Bell size={16} />
+              <span className="notif-dot" aria-hidden="true" />
+            </button>
 
-        {/* Add expense */}
-        <button className="btn btn-primary btn-sm" id="header-add-expense">
-          <Plus size={14} />
-          Add Expense
-        </button>
+            {/* Add expense */}
+            <button className="btn btn-primary btn-sm" id="header-add-expense">
+              <Plus size={14} />
+              Add Expense
+            </button>
+          </>
+        )}
       </div>
     </header>
   )

@@ -1,0 +1,255 @@
+/* ── Summary Row ──────────────────────────────────────────────────────────── */
+.bud-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.bud-summary-card {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all var(--transition-base);
+}
+
+.bud-summary-card:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
+}
+
+.bud-summary-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bud-icon-teal   { background: var(--teal-50);   color: var(--teal-500); }
+.bud-icon-indigo { background: var(--indigo-50);  color: var(--indigo-600); }
+.bud-icon-green  { background: rgba(34,197,94,0.1); color: #16a34a; }
+.bud-icon-red    { background: rgba(239,68,68,0.1); color: var(--error); }
+
+.bud-summary-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--slate-400);
+  margin-bottom: 4px;
+}
+
+.bud-summary-value {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--navy-900);
+  line-height: 1.2;
+}
+
+.bud-value-spent  { color: var(--indigo-600); }
+.bud-value-ok     { color: #16a34a; }
+.bud-value-danger { color: var(--error); }
+
+.bud-summary-sub {
+  font-size: 12px;
+  color: var(--slate-400);
+  margin-top: 2px;
+}
+
+.bud-sub-over { color: var(--error); font-weight: 500; }
+
+.bud-card-danger { border-color: rgba(239, 68, 68, 0.2); }
+
+/* ── Budget Grid ──────────────────────────────────────────────────────────── */
+.bud-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* ── Individual Budget Card ────────────────────────────────────────────────── */
+.bud-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all var(--transition-base);
+}
+
+.bud-card:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
+}
+
+.bud-card-over {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.bud-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bud-cat-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bud-cat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bud-cat-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy-900);
+}
+
+.bud-cat-sub {
+  font-size: 11.5px;
+  color: var(--slate-400);
+  margin-top: 2px;
+}
+
+.bud-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.bud-warn-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--error);
+  white-space: nowrap;
+}
+
+.bud-warn-yellow {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+.bud-pct-pill {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+/* Amounts row */
+.bud-amounts {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.bud-amounts-right { text-align: right; }
+
+.bud-spent-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate-400);
+  margin-bottom: 2px;
+}
+
+.bud-spent-val {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy-900);
+  line-height: 1.2;
+}
+
+.bud-limit-val {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy-600);
+}
+
+/* Progress bar */
+.bud-progress-wrap {
+  height: 6px;
+  background: var(--slate-100);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.bud-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s ease;
+}
+
+/* Card footer */
+.bud-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bud-remaining-text {
+  font-size: 12.5px;
+  color: var(--slate-400);
+  font-weight: 500;
+}
+
+.bud-over-text { color: var(--error); }
+
+.bud-card-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bud-delete-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--slate-200);
+  background: var(--white);
+  color: var(--slate-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bud-delete-btn:hover {
+  background: rgba(239,68,68,0.08);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .bud-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .bud-summary-row { grid-template-columns: 1fr; }
+  .bud-grid { grid-template-columns: 1fr; }
+}
