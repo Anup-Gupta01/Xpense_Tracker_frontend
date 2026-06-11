@@ -5,9 +5,9 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  overflow-y: auto;
+  overflow-y: auto;     /* THIS is the scroll container for all pages */
+  min-height: 0;        /* required: allows flex child to shrink and scroll */
   background: var(--slate-50);
-  min-height: 0;
 }
 
 @media (max-width: 900px) {

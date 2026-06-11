@@ -313,3 +313,20 @@
   .rep-summary-grid { grid-template-columns: 1fr; }
   .rep-donut-layout { flex-direction: column; }
 }
+
+/* ── Loading Overlay ── */
+.rep-loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  color: var(--slate-400);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ── Spin ── */
+.spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+

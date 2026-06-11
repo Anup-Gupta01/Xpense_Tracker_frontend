@@ -1,24 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   User, Settings2, Bell, Shield, Trash2,
   Eye, EyeOff, Check, AlertTriangle, Save,
-  ChevronDown, Moon, Sun,
+  ChevronDown, Moon, Sun, Loader2, AlertCircle,
 } from 'lucide-react'
-import PageShell from '../components/Dashboard/PageShell/PageShell'
+import PageShell      from '../components/Dashboard/PageShell/PageShell'
+import { useAuth }   from '../contexts/AuthContext'
+import { authAPI }   from '../services/api'
 import './SettingsPage.css'
 
 // ── Toggle switch component ────────────────────────────────────────────────────
 function Toggle({ id, checked, onChange, label }) {
   return (
     <label className="stg-toggle" htmlFor={id}>
-      <input
-        id={id}
-        type="checkbox"
-        role="switch"
-        checked={checked}
-        onChange={onChange}
-        aria-label={label}
-      />
+      <input id={id} type="checkbox" role="switch" checked={checked} onChange={onChange} aria-label={label} />
       <span className="stg-toggle-track" aria-hidden="true">
         <span className="stg-toggle-thumb" />
       </span>
@@ -26,14 +21,11 @@ function Toggle({ id, checked, onChange, label }) {
   )
 }
 
-// ── Section wrapper ────────────────────────────────────────────────────────────
 function Section({ icon: Icon, title, subtitle, color, children }) {
   return (
     <div className="stg-section card">
       <div className="stg-section-header">
-        <div className={`stg-section-icon stg-icon-${color}`}>
-          <Icon size={18} />
-        </div>
+        <div className={`stg-section-icon stg-icon-${color}`}><Icon size={18} /></div>
         <div>
           <h2 className="stg-section-title">{title}</h2>
           <p className="stg-section-sub">{subtitle}</p>
@@ -44,7 +36,6 @@ function Section({ icon: Icon, title, subtitle, color, children }) {
   )
 }
 
-// ── Row in a settings section ─────────────────────────────────────────────────
 function SettingRow({ label, description, children }) {
   return (
     <div className="stg-row">
@@ -59,45 +50,86 @@ function SettingRow({ label, description, children }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function SettingsPage() {
-  // Profile
+  const { user, updateUser, logout } = useAuth()
+
+  // ── Profile ──────────────────────────────────────────────────────────────────
   const [profile, setProfile] = useState({
-    firstName: 'John',
-    lastName:  'Doe',
-    email:     'john@example.com',
-    phone:     '+1 (555) 123-4567',
+    firstName: '',
+    lastName:  '',
+    email:     '',
+    phone:     '',
   })
-  const [profileSaved, setProfileSaved] = useState(false)
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileSaved,  setProfileSaved]  = useState(false)
+  const [profileError,  setProfileError]  = useState('')
 
-  function saveProfile() {
-    setProfileSaved(true)
-    setTimeout(() => setProfileSaved(false), 2500)
+  // Populate from auth context
+  useEffect(() => {
+    if (user) {
+      const nameParts = (user.name || '').split(' ')
+      setProfile({
+        firstName: nameParts[0]    || '',
+        lastName:  nameParts.slice(1).join(' ') || '',
+        email:     user.email      || '',
+        phone:     user.phone      || '',
+      })
+    }
+  }, [user])
+
+  async function saveProfile() {
+    setProfileSaving(true)
+    setProfileError('')
+    try {
+      const name = `${profile.firstName.trim()} ${profile.lastName.trim()}`.trim()
+      const { data } = await authAPI.updateProfile({ name, email: profile.email, phone: profile.phone })
+      updateUser(data.user)
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2500)
+    } catch (err) {
+      setProfileError(err.response?.data?.message || 'Failed to save profile.')
+    } finally {
+      setProfileSaving(false)
+    }
   }
 
-  // Preferences
-  const [theme, setTheme]         = useState('light')
-  const [currency, setCurrency]   = useState('USD - US Dollar')
-  const [dateFormat, setDateFormat] = useState('MM/DD/YYYY')
-  const [language, setLanguage]   = useState('English (US)')
+  // ── Preferences ──────────────────────────────────────────────────────────────
+  const prefs = user?.preferences || {}
+  const [theme,      setTheme]      = useState(prefs.theme      || 'light')
+  const [currency,   setCurrency]   = useState(prefs.currency   || 'USD - US Dollar')
+  const [dateFormat, setDateFormat] = useState(prefs.dateFormat || 'MM/DD/YYYY')
+  const [language,   setLanguage]   = useState(prefs.language   || 'English (US)')
 
-  // Notifications
+  async function savePreferences(updates) {
+    try {
+      const { data } = await authAPI.updateProfile({ preferences: updates })
+      updateUser(data.user)
+    } catch (err) {
+      console.error('Preferences save error:', err)
+    }
+  }
+
+  // ── Notifications ────────────────────────────────────────────────────────────
   const [notifs, setNotifs] = useState({
-    email:         true,
-    push:          true,
-    budgetAlerts:  true,
-    weeklyReport:  false,
-    transactionUpdates: true,
+    email:               prefs.notifications?.email               ?? true,
+    push:                prefs.notifications?.push                ?? true,
+    budgetAlerts:        prefs.notifications?.budgetAlerts        ?? true,
+    weeklyReport:        prefs.notifications?.weeklyReport        ?? false,
+    transactionUpdates:  prefs.notifications?.transactionUpdates  ?? true,
   })
 
-  function toggleNotif(key) {
-    setNotifs(prev => ({ ...prev, [key]: !prev[key] }))
+  async function toggleNotif(key) {
+    const updated = { ...notifs, [key]: !notifs[key] }
+    setNotifs(updated)
+    await savePreferences({ notifications: updated })
   }
 
-  // Security
-  const [pwForm, setPwForm]       = useState({ current: '', newPw: '', confirm: '' })
-  const [showPw, setShowPw]       = useState({ current: false, newPw: false, confirm: false })
-  const [pwErrors, setPwErrors]   = useState({})
+  // ── Security ─────────────────────────────────────────────────────────────────
+  const [pwForm,    setPwForm]    = useState({ current: '', newPw: '', confirm: '' })
+  const [showPw,    setShowPw]    = useState({ current: false, newPw: false, confirm: false })
+  const [pwErrors,  setPwErrors]  = useState({})
   const [pwSuccess, setPwSuccess] = useState(false)
-  const [twoFA, setTwoFA]         = useState(false)
+  const [pwSaving,  setPwSaving]  = useState(false)
+  const [twoFA,     setTwoFA]     = useState(false)
 
   function toggleShow(field) {
     setShowPw(prev => ({ ...prev, [field]: !prev[field] }))
@@ -105,39 +137,60 @@ export default function SettingsPage() {
 
   function validatePw() {
     const e = {}
-    if (!pwForm.current)          e.current = 'Enter your current password'
-    if (pwForm.newPw.length < 8)  e.newPw   = 'Password must be at least 8 characters'
+    if (!pwForm.current)         e.current = 'Enter your current password'
+    if (pwForm.newPw.length < 8) e.newPw   = 'Password must be at least 8 characters'
     if (pwForm.newPw !== pwForm.confirm) e.confirm = 'Passwords do not match'
     return e
   }
 
-  function handlePwUpdate() {
+  async function handlePwUpdate() {
     const e = validatePw()
     if (Object.keys(e).length) { setPwErrors(e); return }
+
+    setPwSaving(true)
     setPwErrors({})
-    setPwSuccess(true)
-    setPwForm({ current: '', newPw: '', confirm: '' })
-    setTimeout(() => setPwSuccess(false), 3000)
+    try {
+      await authAPI.changePassword({ currentPassword: pwForm.current, newPassword: pwForm.newPw })
+      setPwSuccess(true)
+      setPwForm({ current: '', newPw: '', confirm: '' })
+      setTimeout(() => setPwSuccess(false), 3000)
+    } catch (err) {
+      setPwErrors({ api: err.response?.data?.message || 'Failed to update password.' })
+    } finally {
+      setPwSaving(false)
+    }
   }
 
-  // Delete account confirm
-  const [showDelete, setShowDelete] = useState(false)
+  // ── Delete Account ────────────────────────────────────────────────────────────
+  const [showDelete,   setShowDelete]   = useState(false)
+  const [deleting,     setDeleting]     = useState(false)
 
-  const CURRENCIES = [
-    'USD - US Dollar', 'EUR - Euro', 'GBP - British Pound',
-    'JPY - Japanese Yen', 'CAD - Canadian Dollar', 'AUD - Australian Dollar', 'INR - Indian Rupee',
-  ]
+  async function handleDeleteAccount() {
+    setDeleting(true)
+    try {
+      await authAPI.deleteAccount()
+      logout()
+    } catch (err) {
+      console.error('Delete account error:', err)
+      setDeleting(false)
+      setShowDelete(false)
+    }
+  }
 
-  const DATE_FORMATS  = ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD']
-  const LANGUAGES     = ['English (US)', 'English (UK)', 'Spanish', 'French', 'German', 'Japanese']
+  const CURRENCIES   = ['USD - US Dollar', 'EUR - Euro', 'GBP - British Pound', 'JPY - Japanese Yen', 'CAD - Canadian Dollar', 'AUD - Australian Dollar', 'INR - Indian Rupee']
+  const DATE_FORMATS = ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD']
+  const LANGUAGES    = ['English (US)', 'English (UK)', 'Spanish', 'French', 'German', 'Japanese']
 
   return (
-    <PageShell
-      title="Settings"
-      subtitle="Manage your account and preferences"
-    >
+    <PageShell title="Settings" subtitle="Manage your account and preferences">
       {/* ── Profile Settings ── */}
       <Section icon={User} title="Profile Settings" subtitle="Update your personal information" color="teal">
+        {profileError && (
+          <div className="stg-error-banner">
+            <AlertCircle size={14} />
+            {profileError}
+          </div>
+        )}
         <div className="stg-form-grid">
           <div className="form-group">
             <label className="form-label" htmlFor="stg-first-name">First Name</label>
@@ -183,21 +236,25 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className="stg-form-actions">
-          <button className="btn btn-teal" onClick={saveProfile} id="profile-save-btn">
-            {profileSaved ? <><Check size={14} /> Saved!</> : <><Save size={14} /> Save Changes</>}
+          <button className="btn btn-teal" onClick={saveProfile} id="profile-save-btn" disabled={profileSaving}>
+            {profileSaving
+              ? <><Loader2 size={14} className="spin" /> Saving…</>
+              : profileSaved
+                ? <><Check size={14} /> Saved!</>
+                : <><Save size={14} /> Save Changes</>
+            }
           </button>
         </div>
       </Section>
 
       {/* ── Preferences ── */}
       <Section icon={Settings2} title="Preferences" subtitle="Customize your experience" color="indigo">
-        {/* Theme */}
         <SettingRow label="Theme" description="Choose your display theme">
           <div className="stg-theme-btns">
             <button
               id="theme-light-btn"
               className={`stg-theme-btn ${theme === 'light' ? 'active' : ''}`}
-              onClick={() => setTheme('light')}
+              onClick={() => { setTheme('light'); savePreferences({ theme: 'light' }) }}
               aria-pressed={theme === 'light'}
             >
               <Sun size={14} /> Light
@@ -205,7 +262,7 @@ export default function SettingsPage() {
             <button
               id="theme-dark-btn"
               className={`stg-theme-btn ${theme === 'dark' ? 'active' : ''}`}
-              onClick={() => setTheme('dark')}
+              onClick={() => { setTheme('dark'); savePreferences({ theme: 'dark' }) }}
               aria-pressed={theme === 'dark'}
             >
               <Moon size={14} /> Dark
@@ -215,14 +272,13 @@ export default function SettingsPage() {
 
         <div className="stg-divider" />
 
-        {/* Currency */}
         <SettingRow label="Currency" description="Set your preferred currency for display">
           <div className="form-select-wrap stg-select-wrap">
             <select
               id="stg-currency"
               className="form-input form-select"
               value={currency}
-              onChange={e => setCurrency(e.target.value)}
+              onChange={e => { setCurrency(e.target.value); savePreferences({ currency: e.target.value }) }}
             >
               {CURRENCIES.map(c => <option key={c}>{c}</option>)}
             </select>
@@ -232,14 +288,13 @@ export default function SettingsPage() {
 
         <div className="stg-divider" />
 
-        {/* Date format */}
         <SettingRow label="Date Format" description="Choose how dates are displayed">
           <div className="form-select-wrap stg-select-wrap">
             <select
               id="stg-date-format"
               className="form-input form-select"
               value={dateFormat}
-              onChange={e => setDateFormat(e.target.value)}
+              onChange={e => { setDateFormat(e.target.value); savePreferences({ dateFormat: e.target.value }) }}
             >
               {DATE_FORMATS.map(d => <option key={d}>{d}</option>)}
             </select>
@@ -249,14 +304,13 @@ export default function SettingsPage() {
 
         <div className="stg-divider" />
 
-        {/* Language */}
         <SettingRow label="Language" description="Select your preferred language">
           <div className="form-select-wrap stg-select-wrap">
             <select
               id="stg-language"
               className="form-input form-select"
               value={language}
-              onChange={e => setLanguage(e.target.value)}
+              onChange={e => { setLanguage(e.target.value); savePreferences({ language: e.target.value }) }}
             >
               {LANGUAGES.map(l => <option key={l}>{l}</option>)}
             </select>
@@ -268,66 +322,39 @@ export default function SettingsPage() {
       {/* ── Notifications ── */}
       <Section icon={Bell} title="Notifications" subtitle="Manage how you receive alerts" color="warning">
         <SettingRow label="Email Notifications" description="Receive updates via email">
-          <Toggle
-            id="notif-email"
-            checked={notifs.email}
-            onChange={() => toggleNotif('email')}
-            label="Email Notifications"
-          />
+          <Toggle id="notif-email" checked={notifs.email} onChange={() => toggleNotif('email')} label="Email Notifications" />
         </SettingRow>
-
         <div className="stg-divider" />
-
         <SettingRow label="Push Notifications" description="Get notified on your devices">
-          <Toggle
-            id="notif-push"
-            checked={notifs.push}
-            onChange={() => toggleNotif('push')}
-            label="Push Notifications"
-          />
+          <Toggle id="notif-push" checked={notifs.push} onChange={() => toggleNotif('push')} label="Push Notifications" />
         </SettingRow>
-
         <div className="stg-divider" />
-
         <SettingRow label="Budget Alerts" description="Send alerts when approaching budget limits">
-          <Toggle
-            id="notif-budget"
-            checked={notifs.budgetAlerts}
-            onChange={() => toggleNotif('budgetAlerts')}
-            label="Budget Alerts"
-          />
+          <Toggle id="notif-budget" checked={notifs.budgetAlerts} onChange={() => toggleNotif('budgetAlerts')} label="Budget Alerts" />
         </SettingRow>
-
         <div className="stg-divider" />
-
         <SettingRow label="Weekly Report" description="Receive a weekly spending summary">
-          <Toggle
-            id="notif-weekly"
-            checked={notifs.weeklyReport}
-            onChange={() => toggleNotif('weeklyReport')}
-            label="Weekly Report"
-          />
+          <Toggle id="notif-weekly" checked={notifs.weeklyReport} onChange={() => toggleNotif('weeklyReport')} label="Weekly Report" />
         </SettingRow>
-
         <div className="stg-divider" />
-
         <SettingRow label="Transaction Updates" description="Get notified for new transactions">
-          <Toggle
-            id="notif-transactions"
-            checked={notifs.transactionUpdates}
-            onChange={() => toggleNotif('transactionUpdates')}
-            label="Transaction Updates"
-          />
+          <Toggle id="notif-transactions" checked={notifs.transactionUpdates} onChange={() => toggleNotif('transactionUpdates')} label="Transaction Updates" />
         </SettingRow>
       </Section>
 
       {/* ── Security ── */}
       <Section icon={Shield} title="Security" subtitle="Manage your account security" color="red">
-        {/* Password fields */}
+        {pwErrors.api && (
+          <div className="stg-error-banner">
+            <AlertCircle size={14} />
+            {pwErrors.api}
+          </div>
+        )}
+
         <div className="stg-form-grid stg-form-grid-1col">
           {[
-            { key: 'current', label: 'Current Password', placeholder: 'Enter current password' },
-            { key: 'newPw',   label: 'New Password',     placeholder: 'Enter new password (min. 8 chars)' },
+            { key: 'current', label: 'Current Password',     placeholder: 'Enter current password' },
+            { key: 'newPw',   label: 'New Password',         placeholder: 'Enter new password (min. 8 chars)' },
             { key: 'confirm', label: 'Confirm New Password', placeholder: 'Confirm new password' },
           ].map(({ key, label, placeholder }) => (
             <div className="form-group" key={key}>
@@ -363,19 +390,17 @@ export default function SettingsPage() {
         )}
 
         <div className="stg-form-actions">
-          <button className="btn btn-primary" onClick={handlePwUpdate} id="update-password-btn">
-            <Shield size={14} />
-            Update Password
+          <button className="btn btn-primary" onClick={handlePwUpdate} id="update-password-btn" disabled={pwSaving}>
+            {pwSaving
+              ? <><Loader2 size={14} className="spin" /> Updating…</>
+              : <><Shield size={14} /> Update Password</>
+            }
           </button>
         </div>
 
         <div className="stg-divider stg-divider-space" />
 
-        {/* Two-Factor Auth */}
-        <SettingRow
-          label="Two-Factor Authentication"
-          description="Add an extra layer of security to your account"
-        >
+        <SettingRow label="Two-Factor Authentication" description="Add an extra layer of security to your account">
           <button
             id="enable-2fa-btn"
             className={`btn btn-sm ${twoFA ? 'btn-teal' : 'btn-outline'}`}
@@ -389,24 +414,15 @@ export default function SettingsPage() {
       {/* ── Danger Zone ── */}
       <div className="stg-danger-zone card" id="danger-zone">
         <div className="stg-section-header">
-          <div className="stg-section-icon stg-icon-red">
-            <AlertTriangle size={18} />
-          </div>
+          <div className="stg-section-icon stg-icon-red"><AlertTriangle size={18} /></div>
           <div>
             <h2 className="stg-section-title stg-title-danger">Danger Zone</h2>
             <p className="stg-section-sub">Irreversible actions</p>
           </div>
         </div>
         <div className="stg-section-body">
-          <SettingRow
-            label="Delete Account"
-            description="Permanently delete your account and all data"
-          >
-            <button
-              className="btn btn-sm btn-danger"
-              onClick={() => setShowDelete(true)}
-              id="delete-account-btn"
-            >
+          <SettingRow label="Delete Account" description="Permanently delete your account and all data">
+            <button className="btn btn-sm btn-danger" onClick={() => setShowDelete(true)} id="delete-account-btn">
               <Trash2 size={13} />
               Delete Account
             </button>
@@ -435,9 +451,8 @@ export default function SettingsPage() {
             </div>
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setShowDelete(false)} id="delete-account-cancel">Cancel</button>
-              <button className="btn btn-danger" id="delete-account-confirm">
-                <Trash2 size={14} />
-                Yes, Delete My Account
+              <button className="btn btn-danger" onClick={handleDeleteAccount} id="delete-account-confirm" disabled={deleting}>
+                {deleting ? <><Loader2 size={14} className="spin" /> Deleting…</> : <><Trash2 size={14} /> Yes, Delete My Account</>}
               </button>
             </div>
           </div>

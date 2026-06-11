@@ -1,7 +1,8 @@
 /* ── Shell layout: sidebar + main ── */
 .dashboard-shell {
   display: flex;
-  min-height: 100vh;
+  height: 100%;             /* fill #root which is height:100% of 100vh */
+  overflow: hidden;
   background: var(--slate-50);
 }
 
@@ -11,7 +12,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 100vh;
+  overflow: hidden;         /* clip so children control their own scroll */
 }
 
 /* ── Scrollable content area ── */
@@ -21,7 +22,8 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  overflow-y: auto;
+  overflow-y: auto;     /* THIS is the scroll container */
+  min-height: 0;        /* allow flexbox shrink so overflow kicks in */
 }
 
 /* ── Section spacing ── */
@@ -56,3 +58,46 @@
   .dashboard-content { padding: 16px; gap: 16px; }
   .dash-bottom-row  { grid-template-columns: 1fr; }
 }
+
+/* ── Error Banner ── */
+.dash-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  margin: 0 28px;
+}
+
+.dash-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dash-retry-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* ── Loading fade ── */
+.dash-loading {
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+

@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Eye, EyeOff, ArrowLeft, Check } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Eye, EyeOff, ArrowLeft, Check, Loader2, AlertCircle } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import './AuthPages.css'
 
 const passwordStrengthLevels = [
@@ -17,7 +18,7 @@ function getPasswordStrength(pwd) {
   if (/[A-Z]/.test(pwd)) score++
   if (/[0-9]/.test(pwd)) score++
   if (/[^A-Za-z0-9]/.test(pwd)) score++
-  return score - 1  // 0-3
+  return score - 1
 }
 
 const benefits = [
@@ -28,28 +29,37 @@ const benefits = [
 ]
 
 export default function SignupPage() {
+  const { register, loading } = useAuth()
+  const navigate = useNavigate()
+
   const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    agreeTerms: false,
-  })
+  const [formData, setFormData] = useState({ fullName: '', email: '', password: '', agreeTerms: false })
+  const [error, setError] = useState('')
 
   const strengthIndex = getPasswordStrength(formData.password)
   const strength = strengthIndex >= 0 ? passwordStrengthLevels[strengthIndex] : null
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+    if (error) setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Signup:', formData)
+    setError('')
+
+    if (!formData.fullName.trim()) { setError('Please enter your full name.'); return }
+    if (!formData.email)            { setError('Please enter your email.'); return }
+    if (formData.password.length < 8) { setError('Password must be at least 8 characters.'); return }
+    if (!formData.agreeTerms)       { setError('Please agree to the Terms of Service.'); return }
+
+    const result = await register(formData.fullName.trim(), formData.email, formData.password)
+    if (result.success) {
+      navigate('/dashboard', { replace: true })
+    } else {
+      setError(result.message)
+    }
   }
 
   return (
@@ -95,14 +105,20 @@ export default function SignupPage() {
 
           <div className="auth-heading">
             <h1 className="auth-title font-display">Create your account</h1>
-            <p className="auth-subtitle">
-              Start your 14-day free trial — no card required
-            </p>
+            <p className="auth-subtitle">Start your 14-day free trial — no card required</p>
           </div>
 
-          {/* Social signup first */}
+          {/* Error Banner */}
+          {error && (
+            <div className="auth-error-banner" role="alert" id="signup-error-banner">
+              <AlertCircle size={15} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Social signup */}
           <div className="auth-social auth-social-top">
-            <button className="btn btn-social flex-1" id="signup-google">
+            <button className="btn btn-social flex-1" id="signup-google" type="button">
               <GoogleIcon />
               Continue with Google
             </button>
@@ -111,7 +127,6 @@ export default function SignupPage() {
           <div className="divider auth-divider">Or sign up with email</div>
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            {/* Full name */}
             <div className="form-group">
               <label htmlFor="signup-name" className="form-label">Full name</label>
               <input
@@ -124,10 +139,10 @@ export default function SignupPage() {
                 className="form-input"
                 value={formData.fullName}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
 
-            {/* Email */}
             <div className="form-group">
               <label htmlFor="signup-email" className="form-label">Work email</label>
               <input
@@ -140,10 +155,10 @@ export default function SignupPage() {
                 className="form-input"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
 
-            {/* Password */}
             <div className="form-group">
               <label htmlFor="signup-password" className="form-label">Password</label>
               <div className="form-input-wrapper">
@@ -157,6 +172,7 @@ export default function SignupPage() {
                   className="form-input form-input-with-icon-right"
                   value={formData.password}
                   onChange={handleChange}
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -168,7 +184,6 @@ export default function SignupPage() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              {/* Strength indicator */}
               {formData.password && (
                 <div className="password-strength">
                   <div className="strength-bars">
@@ -176,23 +191,16 @@ export default function SignupPage() {
                       <div
                         key={i}
                         className="strength-bar"
-                        style={{
-                          background: i <= strengthIndex ? strength?.color : 'var(--slate-200)',
-                        }}
+                        style={{ background: i <= strengthIndex ? strength?.color : 'var(--slate-200)' }}
                       />
                     ))}
                   </div>
-                  {strength && (
-                    <span className="strength-label" style={{ color: strength.color }}>
-                      {strength.label}
-                    </span>
-                  )}
+                  {strength && <span className="strength-label" style={{ color: strength.color }}>{strength.label}</span>}
                 </div>
               )}
               <span className="form-hint">Use 8+ characters with uppercase, numbers, and symbols</span>
             </div>
 
-            {/* Terms */}
             <label className="checkbox-wrapper" id="signup-terms-label">
               <input
                 type="checkbox"
@@ -214,17 +222,19 @@ export default function SignupPage() {
               type="submit"
               className="btn btn-primary btn-lg btn-block"
               id="signup-submit"
-              disabled={!formData.agreeTerms}
+              disabled={!formData.agreeTerms || loading}
             >
-              Create free account
+              {loading ? (
+                <><Loader2 size={16} className="spin" /> Creating account…</>
+              ) : (
+                'Create free account'
+              )}
             </button>
           </form>
 
           <p className="auth-switch text-center">
             Already have an account?{' '}
-            <Link to="/login" className="link" id="signup-to-login">
-              Sign in
-            </Link>
+            <Link to="/login" className="link" id="signup-to-login">Sign in</Link>
           </p>
         </div>
       </div>

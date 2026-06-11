@@ -1,16 +1,16 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Plus, Search, Filter, Download,
   Pencil, Trash2, X, Check, AlertCircle,
-  ChevronDown,
+  ChevronDown, Loader2, RefreshCw,
 } from 'lucide-react'
 import PageShell from '../components/Dashboard/PageShell/PageShell'
-import { expensesMock } from '../data/expensesMockData'
+import { expensesAPI } from '../services/api'
 import './ExpensesPage.css'
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Food & Dining', 'Transportation', 'Shopping', 'Utilities', 'Entertainment', 'Health & Fitness']
-const STATUSES   = ['All', 'completed', 'pending', 'failed']
+// ── Helpers ─────────────────────────────────────────────────────────────────
+const CATEGORIES     = ['All', 'Food & Dining', 'Transportation', 'Shopping', 'Utilities', 'Entertainment', 'Health & Fitness']
+const STATUSES       = ['All', 'completed', 'pending', 'failed']
 const PAYMENT_METHODS = ['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer', 'PayPal']
 
 const EMPTY_FORM = {
@@ -23,40 +23,51 @@ const EMPTY_FORM = {
 }
 
 function statusBadge(status) {
-  const map = {
-    completed: 'badge-status completed',
-    pending:   'badge-status pending',
-    failed:    'badge-status failed',
-  }
+  const map = { completed: 'badge-status completed', pending: 'badge-status pending', failed: 'badge-status failed' }
   return map[status] ?? 'badge-status'
 }
 
-let nextId = 100
-
-// ── Component ──────────────────────────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────────────────────────
 export default function ExpensesPage() {
-  const [expenses, setExpenses] = useState(expensesMock)
-  const [search, setSearch]     = useState('')
-  const [catFilter, setCat]     = useState('All')
-  const [statusFilter, setStatus] = useState('All')
+  const [expenses,     setExpenses]     = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [saving,       setSaving]       = useState(false)
+  const [error,        setError]        = useState('')
+  const [search,       setSearch]       = useState('')
+  const [catFilter,    setCat]          = useState('All')
+  const [statusFilter, setStatus]       = useState('All')
 
   // Modal state
-  const [modal, setModal]       = useState(null)   // null | 'add' | 'edit'
-  const [editId, setEditId]     = useState(null)
-  const [form, setForm]         = useState(EMPTY_FORM)
+  const [modal,    setModal]    = useState(null)
+  const [editId,   setEditId]   = useState(null)
+  const [form,     setForm]     = useState(EMPTY_FORM)
   const [deleteId, setDeleteId] = useState(null)
-  const [errors, setErrors]     = useState({})
+  const [errors,   setErrors]   = useState({})
 
-  // ── Filtering ────────────────────────────────────────────────────────────────
-  const filtered = expenses.filter(e => {
-    const matchSearch = e.description.toLowerCase().includes(search.toLowerCase()) ||
-                        e.category.toLowerCase().includes(search.toLowerCase())
-    const matchCat    = catFilter === 'All' || e.category === catFilter
-    const matchStatus = statusFilter === 'All' || e.status === statusFilter
-    return matchSearch && matchCat && matchStatus
-  })
+  // ── Fetch from API ─────────────────────────────────────────────────────────
+  const fetchExpenses = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const params = {}
+      if (catFilter !== 'All')    params.category = catFilter
+      if (statusFilter !== 'All') params.status   = statusFilter
+      if (search)                 params.search   = search
+      const { data } = await expensesAPI.getAll(params)
+      setExpenses(data.data)
+    } catch (err) {
+      setError('Failed to load expenses. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }, [catFilter, statusFilter, search])
 
-  // ── Form handlers ─────────────────────────────────────────────────────────────
+  useEffect(() => { fetchExpenses() }, [fetchExpenses])
+
+  // ── Filtering (client-side search fallback when params not used) ───────────
+  const filtered = expenses
+
+  // ── Form handlers ─────────────────────────────────────────────────────────
   function openAdd() {
     setForm(EMPTY_FORM)
     setErrors({})
@@ -87,31 +98,45 @@ export default function ExpensesPage() {
     return e
   }
 
-  function handleSave() {
+  async function handleSave() {
     const e = validate()
     if (Object.keys(e).length) { setErrors(e); return }
 
-    const entry = {
-      id:            editId ?? `e${++nextId}`,
-      description:   form.description.trim(),
-      category:      form.category,
-      amount:        parseFloat(form.amount),
-      date:          form.date,
-      paymentMethod: form.paymentMethod,
-      status:        form.status,
-    }
+    setSaving(true)
+    try {
+      const payload = {
+        description:   form.description.trim(),
+        category:      form.category,
+        amount:        parseFloat(form.amount),
+        date:          form.date,
+        paymentMethod: form.paymentMethod,
+        status:        form.status,
+      }
 
-    if (modal === 'edit') {
-      setExpenses(prev => prev.map(ex => ex.id === editId ? entry : ex))
-    } else {
-      setExpenses(prev => [entry, ...prev])
+      if (modal === 'edit') {
+        const { data } = await expensesAPI.update(editId, payload)
+        setExpenses(prev => prev.map(ex => ex.id === editId ? data.data : ex))
+      } else {
+        const { data } = await expensesAPI.create(payload)
+        setExpenses(prev => [data.data, ...prev])
+      }
+      setModal(null)
+    } catch (err) {
+      setErrors({ api: err.response?.data?.message || 'Failed to save expense.' })
+    } finally {
+      setSaving(false)
     }
-    setModal(null)
   }
 
-  function handleDelete(id) {
-    setExpenses(prev => prev.filter(e => e.id !== id))
-    setDeleteId(null)
+  async function handleDelete(id) {
+    try {
+      await expensesAPI.delete(id)
+      setExpenses(prev => prev.filter(e => e.id !== id))
+      setDeleteId(null)
+    } catch (err) {
+      setError('Failed to delete expense.')
+      setDeleteId(null)
+    }
   }
 
   const total = filtered.reduce((s, e) => s + e.amount, 0)
@@ -127,6 +152,17 @@ export default function ExpensesPage() {
         </button>
       }
     >
+      {/* Error banner */}
+      {error && (
+        <div className="exp-error-banner" role="alert">
+          <AlertCircle size={14} />
+          <span>{error}</span>
+          <button className="exp-retry-btn" onClick={fetchExpenses}>
+            <RefreshCw size={12} /> Retry
+          </button>
+        </div>
+      )}
+
       {/* ── Toolbar ── */}
       <div className="exp-toolbar card">
         <div className="exp-search-wrap">
@@ -187,10 +223,14 @@ export default function ExpensesPage() {
       {/* ── Table ── */}
       <div className="card exp-table-card">
         <div className="exp-table-meta">
-          <span className="exp-table-count">{filtered.length} expenses</span>
-          <span className="exp-table-total">
-            Total: <strong>${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+          <span className="exp-table-count">
+            {loading ? 'Loading…' : `${filtered.length} expenses`}
           </span>
+          {!loading && (
+            <span className="exp-table-total">
+              Total: <strong>${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+            </span>
+          )}
         </div>
 
         <div className="exp-table-wrap">
@@ -207,7 +247,14 @@ export default function ExpensesPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="exp-empty">
+                    <Loader2 size={18} className="spin" />
+                    <span>Loading expenses…</span>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="exp-empty">
                     <AlertCircle size={20} />
@@ -218,9 +265,7 @@ export default function ExpensesPage() {
                 filtered.map(exp => (
                   <tr key={exp.id} className="exp-row">
                     <td className="exp-td-desc">{exp.description}</td>
-                    <td>
-                      <span className="exp-category-tag">{exp.category}</span>
-                    </td>
+                    <td><span className="exp-category-tag">{exp.category}</span></td>
                     <td className="exp-td-amount">
                       ${exp.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </td>
@@ -261,7 +306,6 @@ export default function ExpensesPage() {
       {(modal === 'add' || modal === 'edit') && (
         <div className="modal-overlay" role="dialog" aria-modal="true" aria-label={modal === 'add' ? 'Add Expense' : 'Edit Expense'}>
           <div className="modal-box" id="expense-modal">
-            {/* Header */}
             <div className="modal-header">
               <h2 className="modal-title">{modal === 'add' ? 'Add New Expense' : 'Edit Expense'}</h2>
               <button className="modal-close" onClick={() => setModal(null)} aria-label="Close modal" id="modal-close-btn">
@@ -269,8 +313,14 @@ export default function ExpensesPage() {
               </button>
             </div>
 
-            {/* Body */}
             <div className="modal-body">
+              {errors.api && (
+                <div className="form-api-error">
+                  <AlertCircle size={14} />
+                  {errors.api}
+                </div>
+              )}
+
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Description *</label>
@@ -364,12 +414,10 @@ export default function ExpensesPage() {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="modal-footer">
               <button className="btn btn-outline" id="modal-cancel-btn" onClick={() => setModal(null)}>Cancel</button>
-              <button className="btn btn-teal" id="modal-save-btn" onClick={handleSave}>
-                <Check size={14} />
-                {modal === 'add' ? 'Add Expense' : 'Save Changes'}
+              <button className="btn btn-teal" id="modal-save-btn" onClick={handleSave} disabled={saving}>
+                {saving ? <><Loader2 size={14} className="spin" /> Saving…</> : <><Check size={14} /> {modal === 'add' ? 'Add Expense' : 'Save Changes'}</>}
               </button>
             </div>
           </div>

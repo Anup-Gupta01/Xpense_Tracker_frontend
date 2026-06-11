@@ -1,36 +1,44 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react'
+import { Eye, EyeOff, ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
 import './AuthPages.css'
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    rememberMe: false,
-  })
+  const { login, loading } = useAuth()
   const navigate = useNavigate()
+
+  const [showPassword, setShowPassword] = useState(false)
+  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false })
+  const [error, setError] = useState('')
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }))
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+    if (error) setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Placeholder — backend integration comes later
-    console.log('Login:', formData)
+    setError('')
+
+    if (!formData.email || !formData.password) {
+      setError('Please enter your email and password.')
+      return
+    }
+
+    const result = await login(formData.email, formData.password)
+    if (result.success) {
+      navigate('/dashboard', { replace: true })
+    } else {
+      setError(result.message)
+    }
   }
 
   return (
     <div className="auth-layout">
       {/* ─── Left panel — Form ─── */}
       <div className="auth-form-panel">
-        {/* Back to home */}
         <Link to="/" className="auth-back" id="login-back-home">
           <ArrowLeft size={16} />
           Back to home
@@ -46,18 +54,21 @@ export default function LoginPage() {
           {/* Header */}
           <div className="auth-heading">
             <h1 className="auth-title font-display">Welcome back</h1>
-            <p className="auth-subtitle">
-              Sign in to your account to continue
-            </p>
+            <p className="auth-subtitle">Sign in to your account to continue</p>
           </div>
+
+          {/* Error Banner */}
+          {error && (
+            <div className="auth-error-banner" role="alert" id="login-error-banner">
+              <AlertCircle size={15} />
+              <span>{error}</span>
+            </div>
+          )}
 
           {/* Form */}
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            {/* Email */}
             <div className="form-group">
-              <label htmlFor="login-email" className="form-label">
-                Email address
-              </label>
+              <label htmlFor="login-email" className="form-label">Email address</label>
               <input
                 id="login-email"
                 name="email"
@@ -65,17 +76,15 @@ export default function LoginPage() {
                 autoComplete="email"
                 required
                 placeholder="you@example.com"
-                className="form-input"
+                className={`form-input${error ? ' error' : ''}`}
                 value={formData.email}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
 
-            {/* Password */}
             <div className="form-group">
-              <label htmlFor="login-password" className="form-label">
-                Password
-              </label>
+              <label htmlFor="login-password" className="form-label">Password</label>
               <div className="form-input-wrapper">
                 <input
                   id="login-password"
@@ -84,9 +93,10 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   required
                   placeholder="Enter your password"
-                  className="form-input form-input-with-icon-right"
+                  className={`form-input form-input-with-icon-right${error ? ' error' : ''}`}
                   value={formData.password}
                   onChange={handleChange}
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -100,7 +110,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Remember + Forgot */}
             <div className="auth-row">
               <label className="checkbox-wrapper" id="login-remember-label">
                 <input
@@ -117,13 +126,17 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               className="btn btn-primary btn-lg btn-block"
               id="login-submit"
+              disabled={loading}
             >
-              Sign in
+              {loading ? (
+                <><Loader2 size={16} className="spin" /> Signing in…</>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </form>
 
@@ -132,22 +145,19 @@ export default function LoginPage() {
 
           {/* Social */}
           <div className="auth-social">
-            <button className="btn btn-social flex-1" id="login-google">
+            <button className="btn btn-social flex-1" id="login-google" type="button">
               <GoogleIcon />
               Google
             </button>
-            <button className="btn btn-social flex-1" id="login-github">
+            <button className="btn btn-social flex-1" id="login-github" type="button">
               <GitHubIcon />
               GitHub
             </button>
           </div>
 
-          {/* Sign up link */}
           <p className="auth-switch text-center">
             Don&apos;t have an account?{' '}
-            <Link to="/signup" className="link" id="login-to-signup">
-              Sign up
-            </Link>
+            <Link to="/signup" className="link" id="login-to-signup">Sign up</Link>
           </p>
         </div>
       </div>
@@ -189,7 +199,6 @@ export default function LoginPage() {
   )
 }
 
-/* ─── Icon components ─── */
 function GoogleIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">

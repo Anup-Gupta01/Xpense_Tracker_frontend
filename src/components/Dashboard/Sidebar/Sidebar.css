@@ -1,6 +1,8 @@
 .sidebar {
   width: 228px;
-  min-height: 100vh;
+  height: 100%;             /* fill the dashboard-shell flex parent */
+  position: sticky;         /* stay in place as right panel scrolls */
+  top: 0;
   background: var(--navy-950);
   display: flex;
   flex-direction: column;
