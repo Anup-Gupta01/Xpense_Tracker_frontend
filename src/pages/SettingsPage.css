@@ -1,7 +1,8 @@
 /* ── Section card ─────────────────────────────────────────────────────────── */
 .stg-section {
-  overflow: hidden;
+  /* no overflow:hidden — it clips the section body content */
 }
+
 
 .stg-section-header {
   display: flex;
@@ -42,7 +43,7 @@
 }
 
 .stg-section-body {
-  padding: 4px 0;
+  padding: 4px 0 8px;
 }
 
 /* ── Setting row ──────────────────────────────────────────────────────────── */
@@ -193,7 +194,6 @@
 /* ── Danger zone ──────────────────────────────────────────────────────────── */
 .stg-danger-zone {
   border-color: rgba(239, 68, 68, 0.25);
-  overflow: hidden;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
@@ -215,7 +215,7 @@
   font-size: 13px;
   font-weight: 500;
   padding: 10px 14px;
-  margin-bottom: 16px;
+  margin: 12px 24px 4px;
 }
 
 /* ── Spin ── */
