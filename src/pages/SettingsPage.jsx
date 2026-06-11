@@ -21,6 +21,7 @@ function Toggle({ id, checked, onChange, label }) {
   )
 }
 
+// ── Static section card (always expanded) ────────────────────────────────────
 function Section({ icon: Icon, title, subtitle, color, children }) {
   return (
     <div className="stg-section card">
@@ -63,15 +64,14 @@ export default function SettingsPage() {
   const [profileSaved,  setProfileSaved]  = useState(false)
   const [profileError,  setProfileError]  = useState('')
 
-  // Populate from auth context
   useEffect(() => {
     if (user) {
       const nameParts = (user.name || '').split(' ')
       setProfile({
-        firstName: nameParts[0]    || '',
+        firstName: nameParts[0]              || '',
         lastName:  nameParts.slice(1).join(' ') || '',
-        email:     user.email      || '',
-        phone:     user.phone      || '',
+        email:     user.email                || '',
+        phone:     user.phone                || '',
       })
     }
   }, [user])
@@ -110,11 +110,11 @@ export default function SettingsPage() {
 
   // ── Notifications ────────────────────────────────────────────────────────────
   const [notifs, setNotifs] = useState({
-    email:               prefs.notifications?.email               ?? true,
-    push:                prefs.notifications?.push                ?? true,
-    budgetAlerts:        prefs.notifications?.budgetAlerts        ?? true,
-    weeklyReport:        prefs.notifications?.weeklyReport        ?? false,
-    transactionUpdates:  prefs.notifications?.transactionUpdates  ?? true,
+    email:              prefs.notifications?.email              ?? true,
+    push:               prefs.notifications?.push               ?? true,
+    budgetAlerts:       prefs.notifications?.budgetAlerts       ?? true,
+    weeklyReport:       prefs.notifications?.weeklyReport       ?? false,
+    transactionUpdates: prefs.notifications?.transactionUpdates ?? true,
   })
 
   async function toggleNotif(key) {
@@ -137,8 +137,8 @@ export default function SettingsPage() {
 
   function validatePw() {
     const e = {}
-    if (!pwForm.current)         e.current = 'Enter your current password'
-    if (pwForm.newPw.length < 8) e.newPw   = 'Password must be at least 8 characters'
+    if (!pwForm.current)          e.current = 'Enter your current password'
+    if (pwForm.newPw.length < 8)  e.newPw   = 'Password must be at least 8 characters'
     if (pwForm.newPw !== pwForm.confirm) e.confirm = 'Passwords do not match'
     return e
   }
@@ -162,8 +162,8 @@ export default function SettingsPage() {
   }
 
   // ── Delete Account ────────────────────────────────────────────────────────────
-  const [showDelete,   setShowDelete]   = useState(false)
-  const [deleting,     setDeleting]     = useState(false)
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleting,   setDeleting]   = useState(false)
 
   async function handleDeleteAccount() {
     setDeleting(true)
@@ -183,6 +183,7 @@ export default function SettingsPage() {
 
   return (
     <PageShell title="Settings" subtitle="Manage your account and preferences">
+
       {/* ── Profile Settings ── */}
       <Section icon={User} title="Profile Settings" subtitle="Update your personal information" color="teal">
         {profileError && (
@@ -452,7 +453,10 @@ export default function SettingsPage() {
             <div className="modal-footer">
               <button className="btn btn-outline" onClick={() => setShowDelete(false)} id="delete-account-cancel">Cancel</button>
               <button className="btn btn-danger" onClick={handleDeleteAccount} id="delete-account-confirm" disabled={deleting}>
-                {deleting ? <><Loader2 size={14} className="spin" /> Deleting…</> : <><Trash2 size={14} /> Yes, Delete My Account</>}
+                {deleting
+                  ? <><Loader2 size={14} className="spin" /> Deleting…</>
+                  : <><Trash2 size={14} /> Yes, Delete My Account</>
+                }
               </button>
             </div>
           </div>
