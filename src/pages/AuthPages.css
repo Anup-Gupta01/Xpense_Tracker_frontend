@@ -7,7 +7,9 @@
 .auth-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
+  min-height: 100%;       /* fill the #root container */
+  height: 100%;           /* needed so overflow-y works */
+  overflow-y: auto;       /* THIS is the scroll container for auth pages */
 }
 
 .auth-layout-reverse {
@@ -21,7 +23,7 @@
   padding: var(--space-8) var(--space-8);
   background: var(--white);
   position: relative;
-  overflow-y: auto;
+  /* no overflow-y here — parent .auth-layout handles scroll */
 }
 
 .auth-back {
@@ -309,6 +311,9 @@
   .auth-layout,
   .auth-layout-reverse {
     grid-template-columns: 1fr;
+    height: auto;         /* let content define height on mobile */
+    min-height: 100%;     /* still fill the viewport */
+    overflow-y: auto;     /* scroll the single column */
   }
 
   .auth-brand-panel {
@@ -317,5 +322,6 @@
 
   .auth-form-panel {
     padding: var(--space-6) var(--space-4);
+    min-height: 100%;     /* fill viewport when brand panel hidden */
   }
 }
