@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import PageShell  from '../components/Dashboard/PageShell/PageShell'
 import { budgetsAPI } from '../services/api'
+import { useCurrency } from '../contexts/CurrencyContext'
 import './BudgetsPage.css'
 
 // ── Icon map ──────────────────────────────────────────────────────────────────
@@ -42,6 +43,7 @@ function pct(spent, limit) {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 export default function BudgetsPage() {
+  const { formatCurrency, currencySymbol } = useCurrency()
   const [budgets,  setBudgets]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [saving,   setSaving]   = useState(false)
@@ -160,7 +162,7 @@ export default function BudgetsPage() {
           <div>
             <div className="bud-summary-label">Total Budget</div>
             <div className="bud-summary-value">
-              ${totalBudget.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatCurrency(totalBudget)}
             </div>
             <div className="bud-summary-sub">across {budgets.length} categories</div>
           </div>
@@ -171,7 +173,7 @@ export default function BudgetsPage() {
           <div>
             <div className="bud-summary-label">Total Spent</div>
             <div className="bud-summary-value bud-value-spent">
-              ${totalSpent.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatCurrency(totalSpent)}
             </div>
             <div className={`bud-summary-sub ${totalSpent > totalBudget ? 'bud-sub-over' : ''}`}>
               {totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0}% of total budget
@@ -186,10 +188,10 @@ export default function BudgetsPage() {
           <div>
             <div className="bud-summary-label">Remaining</div>
             <div className={`bud-summary-value ${remaining < 0 ? 'bud-value-danger' : 'bud-value-ok'}`}>
-              ${Math.abs(remaining).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {formatCurrency(Math.abs(remaining))}
             </div>
             <div className={`bud-summary-sub ${remaining < 0 ? 'bud-sub-over' : ''}`}>
-              {remaining < 0 ? `$${Math.abs(remaining).toFixed(2)} over budget` : 'available to spend'}
+              {remaining < 0 ? `${formatCurrency(Math.abs(remaining))} over budget` : 'available to spend'}
             </div>
           </div>
         </div>
@@ -244,13 +246,13 @@ export default function BudgetsPage() {
                   <div>
                     <div className="bud-spent-label">Spent</div>
                     <div className="bud-spent-val" style={{ color: isOver ? 'var(--error)' : 'var(--navy-900)' }}>
-                      ${budget.spent.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatCurrency(budget.spent)}
                     </div>
                   </div>
                   <div className="bud-amounts-right">
                     <div className="bud-spent-label">Budget</div>
                     <div className="bud-limit-val">
-                      ${budget.limit.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatCurrency(budget.limit)}
                     </div>
                   </div>
                 </div>
@@ -265,8 +267,8 @@ export default function BudgetsPage() {
                 <div className="bud-card-footer">
                   <div className="bud-remaining-text">
                     {isOver
-                      ? <span className="bud-over-text">${(budget.spent - budget.limit).toFixed(2)} over limit</span>
-                      : <span>${(budget.limit - budget.spent).toFixed(2)} remaining</span>
+                      ? <span className="bud-over-text">{formatCurrency(budget.spent - budget.limit)} over limit</span>
+                      : <span>{formatCurrency(budget.limit - budget.spent)} remaining</span>
                     }
                   </div>
                   <div className="bud-card-btns">
@@ -331,7 +333,7 @@ export default function BudgetsPage() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Monthly Budget (USD) *</label>
+                <label className="form-label">Monthly Budget ({currencySymbol}) *</label>
                 <input
                   id="budget-modal-limit"
                   type="number"

@@ -4,9 +4,10 @@ import {
   Eye, EyeOff, Check, AlertTriangle, Save,
   ChevronDown, Moon, Sun, Loader2, AlertCircle,
 } from 'lucide-react'
-import PageShell      from '../components/Dashboard/PageShell/PageShell'
-import { useAuth }   from '../contexts/AuthContext'
-import { authAPI }   from '../services/api'
+import PageShell        from '../components/Dashboard/PageShell/PageShell'
+import { useAuth }     from '../contexts/AuthContext'
+import { useCurrency } from '../contexts/CurrencyContext'
+import { authAPI }     from '../services/api'
 import './SettingsPage.css'
 
 // ── Toggle switch component ────────────────────────────────────────────────────
@@ -93,11 +94,16 @@ export default function SettingsPage() {
   }
 
   // ── Preferences ──────────────────────────────────────────────────────────────
+  const { setCurrency: setGlobalCurrency } = useCurrency()
   const prefs = user?.preferences || {}
   const [theme,      setTheme]      = useState(prefs.theme      || 'light')
   const [currency,   setCurrency]   = useState(prefs.currency   || 'USD - US Dollar')
   const [dateFormat, setDateFormat] = useState(prefs.dateFormat || 'MM/DD/YYYY')
   const [language,   setLanguage]   = useState(prefs.language   || 'English (US)')
+
+  const [prefsSaving, setPrefsSaving] = useState(false)
+  const [prefsSaved,  setPrefsSaved]  = useState(false)
+  const [prefsError,  setPrefsError]  = useState('')
 
   async function savePreferences(updates) {
     try {
@@ -105,6 +111,24 @@ export default function SettingsPage() {
       updateUser(data.user)
     } catch (err) {
       console.error('Preferences save error:', err)
+    }
+  }
+
+  async function saveAllPreferences() {
+    setPrefsSaving(true)
+    setPrefsError('')
+    try {
+      const updates = { theme, currency, dateFormat, language }
+      const { data } = await authAPI.updateProfile({ preferences: updates })
+      updateUser(data.user)
+      // Apply currency globally so all pages update immediately
+      setGlobalCurrency(currency)
+      setPrefsSaved(true)
+      setTimeout(() => setPrefsSaved(false), 2500)
+    } catch (err) {
+      setPrefsError(err.response?.data?.message || 'Failed to save preferences.')
+    } finally {
+      setPrefsSaving(false)
     }
   }
 
@@ -255,7 +279,7 @@ export default function SettingsPage() {
             <button
               id="theme-light-btn"
               className={`stg-theme-btn ${theme === 'light' ? 'active' : ''}`}
-              onClick={() => { setTheme('light'); savePreferences({ theme: 'light' }) }}
+              onClick={() => setTheme('light')}
               aria-pressed={theme === 'light'}
             >
               <Sun size={14} /> Light
@@ -263,7 +287,7 @@ export default function SettingsPage() {
             <button
               id="theme-dark-btn"
               className={`stg-theme-btn ${theme === 'dark' ? 'active' : ''}`}
-              onClick={() => { setTheme('dark'); savePreferences({ theme: 'dark' }) }}
+              onClick={() => setTheme('dark')}
               aria-pressed={theme === 'dark'}
             >
               <Moon size={14} /> Dark
@@ -279,7 +303,7 @@ export default function SettingsPage() {
               id="stg-currency"
               className="form-input form-select"
               value={currency}
-              onChange={e => { setCurrency(e.target.value); savePreferences({ currency: e.target.value }) }}
+              onChange={e => setCurrency(e.target.value)}
             >
               {CURRENCIES.map(c => <option key={c}>{c}</option>)}
             </select>
@@ -295,7 +319,7 @@ export default function SettingsPage() {
               id="stg-date-format"
               className="form-input form-select"
               value={dateFormat}
-              onChange={e => { setDateFormat(e.target.value); savePreferences({ dateFormat: e.target.value }) }}
+              onChange={e => setDateFormat(e.target.value)}
             >
               {DATE_FORMATS.map(d => <option key={d}>{d}</option>)}
             </select>
@@ -311,13 +335,40 @@ export default function SettingsPage() {
               id="stg-language"
               className="form-input form-select"
               value={language}
-              onChange={e => { setLanguage(e.target.value); savePreferences({ language: e.target.value }) }}
+              onChange={e => setLanguage(e.target.value)}
             >
               {LANGUAGES.map(l => <option key={l}>{l}</option>)}
             </select>
             <ChevronDown size={14} className="form-select-icon" />
           </div>
         </SettingRow>
+
+        {/* Save Preferences button */}
+        {prefsError && (
+          <div className="stg-error-banner" style={{ marginTop: 12 }}>
+            <AlertCircle size={14} />
+            {prefsError}
+          </div>
+        )}
+        <div className="stg-form-actions" style={{ marginTop: 20 }}>
+          <button
+            className="btn btn-teal"
+            onClick={saveAllPreferences}
+            id="preferences-save-btn"
+            disabled={prefsSaving}
+          >
+            {prefsSaving
+              ? <><Loader2 size={14} className="spin" /> Saving…</>
+              : prefsSaved
+                ? <><Check size={14} /> Saved!
+                  <span style={{ marginLeft: 6, opacity: 0.75, fontSize: '0.8em' }}>
+                    Currency updated site-wide
+                  </span>
+                </>
+                : <><Save size={14} /> Save Preferences</>
+            }
+          </button>
+        </div>
       </Section>
 
       {/* ── Notifications ── */}

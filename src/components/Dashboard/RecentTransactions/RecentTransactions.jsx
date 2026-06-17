@@ -1,4 +1,5 @@
 import { ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react'
+import { useCurrency } from '../../../contexts/CurrencyContext'
 import './RecentTransactions.css'
 
 // Category icon glyphs using emoji-safe SVG paths
@@ -17,6 +18,7 @@ function statusBadge(status) {
 }
 
 export default function RecentTransactions({ transactions }) {
+  const { formatCurrency } = useCurrency()
   return (
     <div className="tx-card" id="section-transactions">
       <div className="tx-card-header">
@@ -67,7 +69,7 @@ export default function RecentTransactions({ transactions }) {
                   ? <ArrowUpRight size={13} className="tx-arrow" />
                   : <ArrowDownRight size={13} className="tx-arrow" />
                 }
-                {isIncome ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
+                {isIncome ? '+' : '-'}{formatCurrency(Math.abs(tx.amount))}
               </div>
             </div>
           )

@@ -13,6 +13,7 @@ import {
 import { Bar, Line, Doughnut } from 'react-chartjs-2'
 import PageShell    from '../components/Dashboard/PageShell/PageShell'
 import { reportsAPI } from '../services/api'
+import { useCurrency } from '../contexts/CurrencyContext'
 import {
   monthlySpendingData  as mockMonthly,
   categoryBreakdownData as mockCatBreakdown,
@@ -76,8 +77,9 @@ const PERIOD_KEY_MAP = {
   'This Year':     'thisyear',
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
+// ── Component ────────────────────────────────────────────────────────────────────────
 export default function ReportsPage() {
+  const { formatCurrency } = useCurrency()
   const [period,    setPeriod]    = useState('Last 6 Months')
   const [loading,   setLoading]   = useState(true)
   const [reportData, setReportData] = useState(null)
@@ -234,7 +236,7 @@ export default function ReportsPage() {
                   <div className="rep-legend-dot" style={{ background: c.color }} />
                   <span className="rep-legend-label">{c.label}</span>
                   <span className="rep-legend-pct">{c.percent}%</span>
-                  <span className="rep-legend-val">${c.value.toLocaleString()}</span>
+                  <span className="rep-legend-val">{formatCurrency(c.value)}</span>
                 </div>
               ))}
             </div>
@@ -264,21 +266,21 @@ export default function ReportsPage() {
           <div className="rep-summary-stat">
             <div className="rep-summary-label">Total Spending</div>
             <div className="rep-summary-val rep-val-spend">
-              {loading ? '…' : summary ? `$${summary.totalSpending.toLocaleString()}` : '$0'}
+              {loading ? '…' : summary ? formatCurrency(summary.totalSpending) : formatCurrency(0)}
             </div>
             <div className="rep-summary-note">Period total</div>
           </div>
           <div className="rep-summary-stat">
             <div className="rep-summary-label">Total Income</div>
             <div className="rep-summary-val rep-val-income">
-              {loading ? '…' : summary ? `$${summary.totalIncome.toLocaleString()}` : '$0'}
+              {loading ? '…' : summary ? formatCurrency(summary.totalIncome) : formatCurrency(0)}
             </div>
             <div className="rep-summary-note">Period total</div>
           </div>
           <div className="rep-summary-stat">
             <div className="rep-summary-label">Net Savings</div>
             <div className="rep-summary-val rep-val-save">
-              {loading ? '…' : summary ? `$${summary.netSavings.toLocaleString()}` : '$0'}
+              {loading ? '…' : summary ? formatCurrency(summary.netSavings) : formatCurrency(0)}
             </div>
             <div className="rep-summary-note">Period total</div>
           </div>

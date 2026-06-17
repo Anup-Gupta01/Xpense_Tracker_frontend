@@ -8,6 +8,7 @@ import CategoryDonutChart  from '../components/Dashboard/Charts/CategoryDonutCha
 import BudgetProgress      from '../components/Dashboard/BudgetProgress/BudgetProgress'
 import RecentTransactions  from '../components/Dashboard/RecentTransactions/RecentTransactions'
 import { dashboardAPI, budgetsAPI } from '../services/api'
+import { useCurrency } from '../contexts/CurrencyContext'
 import {
   summaryCards   as mockSummaryCards,
   lineChartData  as mockLineChartData,
@@ -18,8 +19,8 @@ import {
 import './DashboardPage.css'
 
 // ── Transform API data to component shapes ──────────────────────────────────
-function buildSummaryCards(summary) {
-  const fmt = (n) => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2 })
+function buildSummaryCards(summary, formatCurrency) {
+  const fmt = (n) => formatCurrency(Math.abs(n))
   return [
     { id: 'balance',  label: 'Total Balance',   value: fmt(summary.totalBalance),  change: '+0%', trend: 'up',   icon: 'wallet',      color: 'teal'   },
     { id: 'income',   label: 'Total Income',    value: fmt(summary.totalIncome),   change: '+0%', trend: 'up',   icon: 'trending-up', color: 'indigo' },
@@ -40,6 +41,7 @@ function buildBudgetProgress(apibudgets) {
 }
 
 export default function DashboardPage() {
+  const { formatCurrency } = useCurrency()
   const [summaryCards,       setSummaryCards]       = useState(mockSummaryCards)
   const [lineChartData,      setLineChartData]      = useState(mockLineChartData)
   const [categoryData,       setCategoryData]       = useState(mockCategoryData)
@@ -61,7 +63,7 @@ export default function DashboardPage() {
         budgetsAPI.getAll(),
       ])
 
-      setSummaryCards(buildSummaryCards(summaryRes.data.data))
+      setSummaryCards(buildSummaryCards(summaryRes.data.data, formatCurrency))
       setLineChartData(chartRes.data.data)
       setCategoryData(catRes.data.data)
       setRecentTransactions(txRes.data.data)

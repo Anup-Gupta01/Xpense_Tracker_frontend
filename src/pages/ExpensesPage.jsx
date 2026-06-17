@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import PageShell from '../components/Dashboard/PageShell/PageShell'
 import { expensesAPI } from '../services/api'
+import { useCurrency } from '../contexts/CurrencyContext'
 import './ExpensesPage.css'
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -29,6 +30,7 @@ function statusBadge(status) {
 
 // ── Component ────────────────────────────────────────────────────────────────
 export default function ExpensesPage() {
+  const { formatCurrency, currencySymbol } = useCurrency()
   const [expenses,     setExpenses]     = useState([])
   const [loading,      setLoading]      = useState(true)
   const [saving,       setSaving]       = useState(false)
@@ -228,7 +230,7 @@ export default function ExpensesPage() {
           </span>
           {!loading && (
             <span className="exp-table-total">
-              Total: <strong>${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong>
+              Total: <strong>{formatCurrency(total)}</strong>
             </span>
           )}
         </div>
@@ -267,7 +269,7 @@ export default function ExpensesPage() {
                     <td className="exp-td-desc">{exp.description}</td>
                     <td><span className="exp-category-tag">{exp.category}</span></td>
                     <td className="exp-td-amount">
-                      ${exp.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      {formatCurrency(exp.amount)}
                     </td>
                     <td className="exp-td-date">{exp.date}</td>
                     <td className="exp-td-method">{exp.paymentMethod}</td>
@@ -335,7 +337,7 @@ export default function ExpensesPage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Amount (USD) *</label>
+                  <label className="form-label">Amount ({currencySymbol}) *</label>
                   <input
                     id="modal-amount"
                     type="number"

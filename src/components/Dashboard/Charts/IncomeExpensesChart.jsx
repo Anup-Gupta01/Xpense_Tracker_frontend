@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { useCurrency } from '../../../contexts/CurrencyContext'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,6 +22,7 @@ const TEAL   = '#14b8a6'
 const INDIGO = '#6366f1'
 
 export default function IncomeExpensesChart({ data }) {
+  const { currencySymbol } = useCurrency()
   const { labels, income, expenses } = data
 
   const chartData = {
@@ -89,7 +91,7 @@ export default function IncomeExpensesChart({ data }) {
         titleFont: { size: 11, family: 'Inter', weight: '500' },
         bodyFont: { size: 13, family: 'Inter', weight: '600' },
         callbacks: {
-          label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`,
+          label: ctx => ` ${ctx.dataset.label}: ${currencySymbol}${ctx.parsed.y.toLocaleString()}`,
         },
       },
     },
@@ -111,7 +113,7 @@ export default function IncomeExpensesChart({ data }) {
         ticks: {
           font: { size: 11, family: 'Inter' },
           color: '#94a3b8',
-          callback: val => `$${(val / 1000).toFixed(0)}k`,
+          callback: val => `${currencySymbol}${(val / 1000).toFixed(0)}k`,
           maxTicksLimit: 6,
         },
       },

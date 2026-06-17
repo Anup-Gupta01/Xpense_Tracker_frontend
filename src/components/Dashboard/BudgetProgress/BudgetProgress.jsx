@@ -1,10 +1,9 @@
+import { useCurrency } from '../../../contexts/CurrencyContext'
 import './BudgetProgress.css'
 
-function formatAmount(n) {
-  return `$${n.toLocaleString()}`
-}
-
 function BudgetBar({ category, spent, limit, color, id }) {
+  const { formatCurrency } = useCurrency()
+  const fmt = formatCurrency
   const pct = Math.min((spent / limit) * 100, 100)
   const isWarning = pct >= 80 && pct < 100
   const isOver    = pct >= 100
@@ -21,9 +20,9 @@ function BudgetBar({ category, spent, limit, color, id }) {
           <span className="budget-category">{category}</span>
         </div>
         <div className="budget-amounts">
-          <span className="budget-spent">{formatAmount(spent)}</span>
+          <span className="budget-spent">{fmt(spent)}</span>
           <span className="budget-sep">/</span>
-          <span className="budget-limit">{formatAmount(limit)}</span>
+          <span className="budget-limit">{fmt(limit)}</span>
         </div>
       </div>
 
@@ -40,7 +39,7 @@ function BudgetBar({ category, spent, limit, color, id }) {
 
       <div className="budget-footer">
         <span className={`budget-status ${isOver ? 'status-over' : isWarning ? 'status-warn' : 'status-ok'}`}>
-          {isOver ? 'Over budget' : isWarning ? 'Near limit' : `${formatAmount(limit - spent)} remaining`}
+          {isOver ? 'Over budget' : isWarning ? 'Near limit' : `${fmt(limit - spent)} remaining`}
         </span>
         <span className="budget-pct">{Math.round(pct)}%</span>
       </div>
